@@ -17,19 +17,21 @@ model Review {
 }
 
 model Schedule {
-  id             Int              @id
-  userId         String           @db.VarChar(28)
-  movieId        Int
-  isoDate        String           @db.VarChar(255)
-  ScheduleInvite ScheduleInvite[]
+  userId          String           @db.VarChar(28)
+  isoDate         String           @db.VarChar(255)
+  movieId         Int
+  scheduleInvites ScheduleInvite[]
+
+  @@id([userId, isoDate])
 }
 
 model ScheduleInvite {
-  id       Int
   userId   String   @db.VarChar(28)
-  schedule Schedule @relation(fields: [id], references: [id])
+  isoDate  String   @db.VarChar(255)
+  friendId String   @db.VarChar(28)
+  schedule Schedule @relation(fields: [userId, isoDate], references: [userId, isoDate], onDelete: Cascade)
 
-  @@id([id, userId])
+  @@id([userId, isoDate, friendId])
 }
 
 model Friend {
