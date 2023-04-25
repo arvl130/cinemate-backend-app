@@ -1,15 +1,10 @@
 import express from "express"
-import TMDB from "tmdb-ts"
-
-const { TMDB_ACCESS_TOKEN } = process.env
-if (typeof TMDB_ACCESS_TOKEN !== "string")
-  throw new Error("Invalid TMDB access token")
+import { tmdb } from "../services/tmdb"
 
 export const movieRouter = express.Router()
 
 //now showing
 movieRouter.get("/now_showing", async (req, res) => {
-  const tmdb = new TMDB(TMDB_ACCESS_TOKEN)
   const { results } = await tmdb.trending.trending("movie", "week")
 
   res.json({
@@ -20,7 +15,6 @@ movieRouter.get("/now_showing", async (req, res) => {
 
 //Popular movie
 movieRouter.get("/popular/movie", async (req, res) => {
-  const tmdb = new TMDB(TMDB_ACCESS_TOKEN)
   const { results } = await tmdb.movies.popular()
 
   res.json({
@@ -31,7 +25,6 @@ movieRouter.get("/popular/movie", async (req, res) => {
 
 //Popular TV
 movieRouter.get("/popular/tv", async (req, res) => {
-  const tmdb = new TMDB(TMDB_ACCESS_TOKEN)
   const { results } = await tmdb.tvShows.popular()
 
   res.json({
@@ -42,7 +35,6 @@ movieRouter.get("/popular/tv", async (req, res) => {
 
 //Popular MOVIE AND TV SHOWS
 movieRouter.get("/popular", async (req, res) => {
-  const tmdb = new TMDB(TMDB_ACCESS_TOKEN)
   const popularMovies = await tmdb.movies.popular()
   const popularTvShows = await tmdb.tvShows.popular()
 
@@ -54,7 +46,6 @@ movieRouter.get("/popular", async (req, res) => {
 
 //search movie
 movieRouter.get("/search/:searchTerm", async (req, res) => {
-  const tmdb = new TMDB(TMDB_ACCESS_TOKEN)
   const { results } = await tmdb.search.movies({
     query: req.params.searchTerm,
   })
@@ -67,7 +58,6 @@ movieRouter.get("/search/:searchTerm", async (req, res) => {
 
 //search movie_id
 movieRouter.get("/:movieid", async (req, res) => {
-  const tmdb = new TMDB(TMDB_ACCESS_TOKEN)
   const movie = await tmdb.movies.details(req.params.movieid)
 
   res.json({
