@@ -1,9 +1,12 @@
-const express = require("express")
-const cors = require("cors")
-const app = express()
-const TMDB_API_KEY = process.env.TMDB_API_KEY
-require("dotenv").config()
+import { config } from "dotenv"
+import express from "express"
+import cors from "cors"
 
+config()
+const { TMDB_API_KEY } = process.env
+if (typeof TMDB_API_KEY !== "string") throw new Error("Invalid TMDB API key")
+
+const app = express()
 app.use(cors())
 
 //now showing
@@ -51,15 +54,11 @@ app.get("/movie/popular", async (req, res) => {
   const response2 = await fetch(link2)
   const data2 = await response2.json()
 
-
-
   res.json({
     message: `Search results for Popular Movies And TV Shows`,
     result: [...data.results, ...data2.results],
   })
 })
-
-
 
 //search movie
 app.get("/movie/search/:searchTerm", async (req, res) => {
@@ -73,26 +72,19 @@ app.get("/movie/search/:searchTerm", async (req, res) => {
   })
 })
 
-
 //search movie_id
 app.get("/movie/:movieid", async (req, res) => {
   const link = `https://api.themoviedb.org/3/movie/${req.params.movieid}?api_key=${TMDB_API_KEY}&language=en-US`
   const response = await fetch(link)
   const data = await response.json()
 
-  
   res.json({
     message: `Retrieved Movie with ID: ${req.params.movieid}`,
     result: data,
   })
 })
 
-
-
-
-
-
-const port = process.env.PORT | 3000
+const port = process.env.PORT || 3000
 app.listen(port, () => {
   console.log(`Listening on port ${port} ...`)
 })
