@@ -1,10 +1,10 @@
-import express from "express"
+import { Request, Response, Router } from "express"
 import { tmdb } from "../services/tmdb"
 
-export const movieRouter = express.Router()
+export const movieRouter = Router()
 
 //now showing
-movieRouter.get("/now_showing", async (req, res) => {
+movieRouter.get("/now_showing", async (req: Request, res: Response) => {
   const { results } = await tmdb.trending.trending("movie", "week")
 
   res.json({
@@ -14,7 +14,7 @@ movieRouter.get("/now_showing", async (req, res) => {
 })
 
 //Popular movie
-movieRouter.get("/popular/movie", async (req, res) => {
+movieRouter.get("/popular/movie", async (req: Request, res: Response) => {
   const { results } = await tmdb.movies.popular()
 
   res.json({
@@ -24,7 +24,7 @@ movieRouter.get("/popular/movie", async (req, res) => {
 })
 
 //Popular TV
-movieRouter.get("/popular/tv", async (req, res) => {
+movieRouter.get("/popular/tv", async (req: Request, res: Response) => {
   const { results } = await tmdb.tvShows.popular()
 
   res.json({
@@ -34,7 +34,7 @@ movieRouter.get("/popular/tv", async (req, res) => {
 })
 
 //Popular MOVIE AND TV SHOWS
-movieRouter.get("/popular", async (req, res) => {
+movieRouter.get("/popular", async (req: Request, res: Response) => {
   const popularMovies = await tmdb.movies.popular()
   const popularTvShows = await tmdb.tvShows.popular()
 
@@ -45,7 +45,7 @@ movieRouter.get("/popular", async (req, res) => {
 })
 
 //search movie
-movieRouter.get("/search/:searchTerm", async (req, res) => {
+movieRouter.get("/search/:searchTerm", async (req: Request, res: Response) => {
   const { results } = await tmdb.search.movies({
     query: req.params.searchTerm,
   })
@@ -57,8 +57,8 @@ movieRouter.get("/search/:searchTerm", async (req, res) => {
 })
 
 //search movie_id
-movieRouter.get("/:movieid", async (req, res) => {
-  const movie = await tmdb.movies.details(req.params.movieid)
+movieRouter.get("/:movieid", async (req: Request, res: Response) => {
+  const movie = await tmdb.movies.details(parseInt(req.params.movieid))
 
   res.json({
     message: `Retrieved Movie with ID: ${req.params.movieid}`,
