@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Review {
+  movieId Int
+  userId  String @db.VarChar(28)
+  details String @db.VarChar(5000)
+  rating  Int
+
+  @@id([movieId, userId])
+}
+
+model Schedule {
+  id             Int              @id
+  userId         String           @db.VarChar(28)
+  movieId        Int
+  isoDate        String           @db.VarChar(255)
+  ScheduleInvite ScheduleInvite[]
+}
+
+model ScheduleInvite {
+  id       Int
+  userId   String   @db.VarChar(28)
+  schedule Schedule @relation(fields: [id], references: [id])
+
+  @@id([id, userId])
+}
+
+model Friend {
+  userId   String @db.VarChar(28)
+  friendId String @db.VarChar(28)
+
+  @@id([userId, friendId])
+}
+
+model BlockedUser {
+  userId        String @db.VarChar(28)
+  blockedUserId String @db.VarChar(28)
+
+  @@id([userId, blockedUserId])
+}
+
+enum WatchStatus {
+  WatchList
+  Watched
+}
+
+model UserMovie {
+  userId      String      @db.VarChar(28)
+  movieId     Int
+  watchStatus WatchStatus
+
+  @@id([userId, movieId])
+}
