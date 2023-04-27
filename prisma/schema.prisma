@@ -8,10 +8,11 @@ datasource db {
 }
 
 model Review {
-  movieId Int
-  userId  String @db.VarChar(28)
-  details String @db.VarChar(5000)
-  rating  Int
+  movieId   Int
+  userId    String   @db.VarChar(28)
+  details   String   @db.VarChar(5000)
+  rating    Int
+  createdAt DateTime @default(now())
 
   @@id([movieId, userId])
 }
