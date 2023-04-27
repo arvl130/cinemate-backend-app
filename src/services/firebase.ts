@@ -40,3 +40,7 @@ export async function getUserIdFromHeaders(req: Request) {
   const { uid } = await auth.verifyIdToken(idToken)
   return uid
 }
+
+export function getUserProfile(userId: string) {
+  return auth.getUser(userId)
+}

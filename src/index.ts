@@ -10,6 +10,7 @@ import { watchedRouter } from "./routers/watched"
 import { watchListRouter } from "./routers/watchlist"
 import { friendRouter } from "./routers/friend"
 import { blockedUserRouter } from "./routers/blockedUser"
+import { userRouter } from "./routers/user"
 
 const app = express()
 app.use(cors())
@@ -18,6 +19,7 @@ app.use(express.json())
 app.use("/movie", movieRouter)
 app.use("/movie", reviewRouter)
 
+app.use("/user", userRouter)
 app.use("/user", scheduleRouter)
 app.use("/user", watchedRouter)
 app.use("/user", watchListRouter)
