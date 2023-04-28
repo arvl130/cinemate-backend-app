@@ -1,6 +1,6 @@
 import { Request } from "express"
 import { getApps, getApp, initializeApp, cert } from "firebase-admin/app"
-import { getAuth } from "firebase-admin/auth"
+import { UserRecord, getAuth } from "firebase-admin/auth"
 
 const {
   FIREBASE_ADMIN_PROJECT_ID,
@@ -43,4 +43,18 @@ export async function getUserIdFromHeaders(req: Request) {
 
 export function getUserProfile(userId: string) {
   return auth.getUser(userId)
+}
+
+export async function getAllUsers(
+  nextPageToken?: string
+): Promise<UserRecord[]> {
+  const listUsersResult = await auth.listUsers(1000, nextPageToken)
+
+  if (listUsersResult.pageToken) {
+    const nextUsers = await getAllUsers(listUsersResult.pageToken)
+    const result = [...listUsersResult.users, ...nextUsers]
+    return result
+  } else {
+    return listUsersResult.users
+  }
 }
