@@ -50,7 +50,7 @@ const createSchema = z.object({
     offset: true,
   }),
   movieId: z.number(),
-  invitedFriendIds: z.string().length(28).array().nonempty(),
+  invitedFriendIds: z.string().length(28).array(),
 })
 
 scheduleRouter.post(
@@ -140,6 +140,9 @@ scheduleRouter.get(
             isoDate,
           },
         },
+        include: {
+          scheduleInvites: true,
+        },
       })
 
       if (!schedule) {
@@ -170,18 +173,30 @@ scheduleRouter.get(
   }
 )
 
+const editSchema = z.object({
+  userId: z.string().length(28),
+  isoDate: z.string().datetime({
+    offset: true,
+  }),
+  newIsoDate: z.string().datetime({
+    offset: true,
+  }),
+  movieId: z.number(),
+  invitedFriendIds: z.string().length(28).array(),
+})
+
 scheduleRouter.patch(
   "/:userId/schedule/:isoDate",
   async (req: Request, res: Response) => {
     try {
-      const { userId, isoDate, movieId, invitedFriendIds } = createSchema.parse(
-        {
+      const { userId, isoDate, movieId, invitedFriendIds, newIsoDate } =
+        editSchema.parse({
           userId: req.params.userId,
           isoDate: req.params.isoDate,
+          newIsoDate: req.body.isoDate,
           movieId: parseInt(req.body.movieId),
           invitedFriendIds: req.body.invitedFriendIds,
-        }
-      )
+        })
 
       await prisma.$transaction(async (tx) => {
         await tx.schedule.delete({
@@ -196,7 +211,7 @@ scheduleRouter.patch(
         await tx.schedule.create({
           data: {
             userId,
-            isoDate,
+            isoDate: newIsoDate,
             movieId,
             scheduleInvites: {
               createMany: {
