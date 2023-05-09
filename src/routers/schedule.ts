@@ -183,36 +183,44 @@ const editSchema = z.object({
   }),
   movieId: z.number(),
   invitedFriendIds: z.string().length(28).array(),
+  isPending: z.boolean(),
 })
 
 scheduleRouter.patch(
   "/:userId/schedule/:isoDate",
   async (req: Request, res: Response) => {
     try {
-      const { userId, isoDate, movieId, invitedFriendIds, newIsoDate } =
-        editSchema.parse({
-          userId: req.params.userId,
-          isoDate: req.params.isoDate,
-          newIsoDate: req.body.isoDate,
-          movieId: parseInt(req.body.movieId),
-          invitedFriendIds: req.body.invitedFriendIds,
-        })
+      const {
+        userId,
+        isoDate,
+        movieId,
+        invitedFriendIds,
+        newIsoDate,
+        isPending,
+      } = editSchema.parse({
+        userId: req.params.userId,
+        isoDate: req.params.isoDate,
+        newIsoDate: req.body.isoDate,
+        isPending: req.body.isPending,
+        movieId: parseInt(req.body.movieId),
+        invitedFriendIds: req.body.invitedFriendIds,
+      })
 
-      await prisma.$transaction(async (tx) => {
-        await tx.schedule.delete({
+      await prisma.$transaction([
+        prisma.schedule.delete({
           where: {
             userId_isoDate: {
               userId,
               isoDate,
             },
           },
-        })
-
-        await tx.schedule.create({
+        }),
+        prisma.schedule.create({
           data: {
             userId,
             isoDate: newIsoDate,
             movieId,
+            isPending,
             scheduleInvites: {
               createMany: {
                 data: invitedFriendIds.map((friendId) => {
@@ -223,8 +231,8 @@ scheduleRouter.patch(
               },
             },
           },
-        })
-      })
+        }),
+      ])
 
       res.json({
         message: `Edited schedule`,

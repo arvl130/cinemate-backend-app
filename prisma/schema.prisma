@@ -20,6 +20,7 @@ model Review {
 model Schedule {
   userId          String           @db.VarChar(28)
   isoDate         String           @db.VarChar(255)
+  isPending       Boolean          @default(true)
   movieId         Int
   scheduleInvites ScheduleInvite[]
 
