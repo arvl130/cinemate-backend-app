@@ -1,9 +1,128 @@
 import { Request, Response, Router } from "express"
 import { tmdb } from "../services/tmdb"
 import { prisma } from "../services/prisma"
+import {
+  getMovieRecommendationsByCategory,
+  getRandomMovieRecommendations,
+} from "../services/openai"
 import { ZodError, z } from "zod"
 
 export const movieRouter = Router()
+
+const getRecommendationsByCategory = z.object({
+  category: z.union([
+    z.literal("Action"),
+    z.literal("Adventure"),
+    z.literal("Animation"),
+    z.literal("Biography"),
+    z.literal("Comedy"),
+    z.literal("Crime"),
+    z.literal("Documentary"),
+    z.literal("Drama"),
+    z.literal("Family"),
+    z.literal("Fantasy"),
+    z.literal("Film-Noir"),
+    z.literal("History"),
+    z.literal("Horror"),
+    z.literal("Musical"),
+    z.literal("Mystery"),
+    z.literal("Romance"),
+    z.literal("Sci-Fi"),
+    z.literal("Sport"),
+    z.literal("Thriller"),
+    z.literal("War"),
+    z.literal("Western"),
+    z.literal("Art-house"),
+    z.literal("Black-Comedy"),
+    z.literal("Chick-flick"),
+    z.literal("Cult-classic"),
+    z.literal("Dark-Comedy"),
+    z.literal("Epic"),
+    z.literal("Experimental"),
+    z.literal("Fairy-tale"),
+    z.literal("Film-within-a-film"),
+    z.literal("Futuristic"),
+    z.literal("Gangster"),
+    z.literal("Heist"),
+    z.literal("Historical"),
+    z.literal("Holiday"),
+    z.literal("Indie"),
+    z.literal("Juvenile"),
+    z.literal("Melodrama"),
+    z.literal("Monster"),
+    z.literal("Political"),
+    z.literal("Psychological"),
+    z.literal("Road-movie"),
+    z.literal("Satire"),
+    z.literal("Science-Fiction"),
+    z.literal("Slapstick"),
+    z.literal("Social-issue"),
+    z.literal("Superhero"),
+    z.literal("Surreal"),
+    z.literal("Teen"),
+    z.literal("Vampire"),
+    z.literal("Zombie"),
+  ]),
+})
+
+movieRouter.get(
+  "/ai-recommendations/:category",
+  async (req: Request, res: Response) => {
+    const { category } = getRecommendationsByCategory.parse({
+      category: req.params.category,
+    })
+
+    const movieRecommendations = await getMovieRecommendationsByCategory(
+      category
+    )
+    const movieRecommendationsTitleYear = movieRecommendations.map(
+      (movieRecommendation) => ({
+        title: movieRecommendation.split("|")[0],
+        year: movieRecommendation.split("|")[1],
+      })
+    )
+    const movieRecommendationPromises = movieRecommendationsTitleYear.map(
+      async (movieRecommendation) => {
+        const { results } = await tmdb.search.movies({
+          query: movieRecommendation.title,
+          year: parseInt(movieRecommendation.year),
+        })
+        return results[0]
+      }
+    )
+    const results = await Promise.all(movieRecommendationPromises)
+
+    res.json({
+      message: "Retrieved AI-generated movie recommendations",
+      results: results.filter((result) => result !== null),
+    })
+  }
+)
+
+movieRouter.get("/ai-recommendations", async (req: Request, res: Response) => {
+  const movieRecommendations = await getRandomMovieRecommendations()
+  const movieRecommendationsTitleYear = movieRecommendations.map(
+    (movieRecommendation) => ({
+      title: movieRecommendation.split("|")[0],
+      year: movieRecommendation.split("|")[1],
+    })
+  )
+  const movieRecommendationPromises = movieRecommendationsTitleYear.map(
+    async (movieRecommendation) => {
+      const { results } = await tmdb.search.movies({
+        query: movieRecommendation.title,
+        year: parseInt(movieRecommendation.year),
+      })
+      return results[0]
+    }
+  )
+  const results = await Promise.all(movieRecommendationPromises)
+
+  res.json({
+    message: "Retrieved AI-generated movie recommendations",
+    results: results.filter((result) => result !== null),
+  })
+})
 
 //now showing
 movieRouter.get("/now_showing", async (req: Request, res: Response) => {
@@ -11,7 +130,7 @@ movieRouter.get("/now_showing", async (req: Request, res: Response) => {
 
   res.json({
     message: `Search results for Now showing`,
-    results,
+    results: results.slice(0, 5),
   })
 })
 
@@ -21,7 +140,7 @@ movieRouter.get("/popular/movie", async (req: Request, res: Response) => {
 
   res.json({
     message: `Search results for Popular Movie`,
-    results,
+    results: results.slice(0, 10),
   })
 })
 
