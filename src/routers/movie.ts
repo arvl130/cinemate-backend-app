@@ -1,5 +1,7 @@
 import { Request, Response, Router } from "express"
 import { tmdb } from "../services/tmdb"
+import { prisma } from "../services/prisma"
+import { ZodError, z } from "zod"
 
 export const movieRouter = Router()
 
@@ -65,3 +67,55 @@ movieRouter.get("/:movieid", async (req: Request, res: Response) => {
     result: movie,
   })
 })
+
+const getOverallRatingSchema = z.object({
+  movieId: z.number(),
+})
+
+//search movie_id
+movieRouter.get(
+  "/:movieId/overall-rating",
+  async (req: Request, res: Response) => {
+    try {
+      const { movieId } = getOverallRatingSchema.parse({
+        movieId: parseInt(req.params.movieId),
+      })
+
+      const reviews = await prisma.review.findMany({
+        where: {
+          movieId,
+        },
+      })
+
+      const rating =
+        reviews.length > 0
+          ? Math.floor(
+              reviews.reduce((runningTally, review) => {
+                return runningTally + review.rating
+              }, 0) / reviews.length
+            )
+          : 0
+
+      res.json({
+        message: `Retrieved overall rating for movie with ID: ${req.params.movieid}`,
+        result: {
+          rating,
+          reviewCount: reviews.length,
+        },
+      })
+    } catch (e) {
+      if (e instanceof ZodError) {
+        res.status(400).json({
+          message: "Validation error occured",
+          error: e,
+        })
+        return
+      }
+
+      res.status(500).json({
+        message: "Unknown error occured",
+        error: e,
+      })
+    }
+  }
+)
