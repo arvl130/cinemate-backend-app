@@ -50,6 +50,7 @@ const createSchema = z.object({
     offset: true,
   }),
   movieId: z.number(),
+  notificationId: z.string().uuid(),
   invitedFriendIds: z.string().length(28).array(),
 })
 
@@ -57,20 +58,21 @@ scheduleRouter.post(
   "/:userId/schedule",
   async (req: Request, res: Response) => {
     try {
-      const { userId, isoDate, movieId, invitedFriendIds } = createSchema.parse(
-        {
+      const { userId, isoDate, movieId, notificationId, invitedFriendIds } =
+        createSchema.parse({
           userId: req.params.userId,
           isoDate: req.body.isoDate,
           movieId: parseInt(req.body.movieId),
           invitedFriendIds: req.body.invitedFriendIds,
-        }
-      )
+          notificationId: req.body.notificationId,
+        })
 
       const schedule = await prisma.schedule.create({
         data: {
           userId,
           isoDate,
           movieId,
+          notificationId,
           scheduleInvites: {
             createMany: {
               data: invitedFriendIds.map((friendId) => {
@@ -182,6 +184,7 @@ const editSchema = z.object({
     offset: true,
   }),
   movieId: z.number(),
+  notificationId: z.string().uuid(),
   invitedFriendIds: z.string().length(28).array(),
   isPending: z.boolean(),
 })
@@ -197,12 +200,14 @@ scheduleRouter.patch(
         invitedFriendIds,
         newIsoDate,
         isPending,
+        notificationId,
       } = editSchema.parse({
         userId: req.params.userId,
         isoDate: req.params.isoDate,
         newIsoDate: req.body.isoDate,
         isPending: req.body.isPending,
         movieId: parseInt(req.body.movieId),
+        notificationId: req.body.notificationId,
         invitedFriendIds: req.body.invitedFriendIds,
       })
 
@@ -221,6 +226,7 @@ scheduleRouter.patch(
             isoDate: newIsoDate,
             movieId,
             isPending,
+            notificationId,
             scheduleInvites: {
               createMany: {
                 data: invitedFriendIds.map((friendId) => {
