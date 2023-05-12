@@ -8,7 +8,8 @@
     "start": "ts-node --transpile-only index.ts",
     "dev": "ts-node-dev --respawn --transpile-only --exit-child --watch index.ts index.ts",
     "db:push": "prisma db push",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "postinstall": "prisma generate"
   },
   "author": "",
   "license": "ISC",
