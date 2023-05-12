@@ -3,14 +3,14 @@ config()
 
 import express from "express"
 import cors from "cors"
-import { movieRouter } from "./routers/movie"
-import { reviewRouter } from "./routers/review"
-import { scheduleRouter } from "./routers/schedule"
-import { watchedRouter } from "./routers/watched"
-import { watchListRouter } from "./routers/watchlist"
-import { friendRouter } from "./routers/friend"
-import { blockedUserRouter } from "./routers/blockedUser"
-import { userRouter } from "./routers/user"
+import { movieRouter } from "./src/routers/movie"
+import { reviewRouter } from "./src/routers/review"
+import { scheduleRouter } from "./src/routers/schedule"
+import { watchedRouter } from "./src/routers/watched"
+import { watchListRouter } from "./src/routers/watchlist"
+import { friendRouter } from "./src/routers/friend"
+import { blockedUserRouter } from "./src/routers/blockedUser"
+import { userRouter } from "./src/routers/user"
 
 const app = express()
 app.use(cors())
