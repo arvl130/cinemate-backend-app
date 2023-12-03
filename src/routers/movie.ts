@@ -68,59 +68,17 @@ const getRecommendationsByCategory = z.object({
 movieRouter.get(
   "/ai-recommendations/:category",
   async (req: Request, res: Response) => {
-    const { category } = getRecommendationsByCategory.parse({
-      category: req.params.category,
-    })
-
-    const movieRecommendations = await getMovieRecommendationsByCategory(
-      category
-    )
-    const movieRecommendationsTitleYear = movieRecommendations.map(
-      (movieRecommendation) => ({
-        title: movieRecommendation.split("|")[0],
-        year: movieRecommendation.split("|")[1],
-      })
-    )
-    const movieRecommendationPromises = movieRecommendationsTitleYear.map(
-      async (movieRecommendation) => {
-        const { results } = await tmdb.search.movies({
-          query: movieRecommendation.title,
-          year: parseInt(movieRecommendation.year),
-        })
-        return results[0]
-      }
-    )
-    const results = await Promise.all(movieRecommendationPromises)
-
     res.json({
       message: "Retrieved AI-generated movie recommendations",
-      results: results.filter((result) => result !== null),
+      results: [],
     })
   }
 )
 
 movieRouter.get("/ai-recommendations", async (req: Request, res: Response) => {
-  const movieRecommendations = await getRandomMovieRecommendations()
-  const movieRecommendationsTitleYear = movieRecommendations.map(
-    (movieRecommendation) => ({
-      title: movieRecommendation.split("|")[0],
-      year: movieRecommendation.split("|")[1],
-    })
-  )
-  const movieRecommendationPromises = movieRecommendationsTitleYear.map(
-    async (movieRecommendation) => {
-      const { results } = await tmdb.search.movies({
-        query: movieRecommendation.title,
-        year: parseInt(movieRecommendation.year),
-      })
-      return results[0]
-    }
-  )
-  const results = await Promise.all(movieRecommendationPromises)
-
   res.json({
     message: "Retrieved AI-generated movie recommendations",
-    results: results.filter((result) => result !== null),
+    results: [],
   })
 })
 
